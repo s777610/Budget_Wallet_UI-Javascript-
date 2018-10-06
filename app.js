@@ -23,6 +23,7 @@ var budgetController = (function () {
       }
     };
 
+
     return {
       addItem: function(type, des, val) {
         var newItem, ID;
@@ -33,7 +34,6 @@ var budgetController = (function () {
           ID = 0;
         }
 
-
         // create new item based on inc or exp type
         if (type === 'exp') {
           newItem = new Expense(ID, des, val);
@@ -43,7 +43,6 @@ var budgetController = (function () {
         // push it into our data structure
         data.allItems[type].push(newItem);
         return newItem;
-
       },
 
       testing: function() {
@@ -97,8 +96,23 @@ var UIController = (function() {
 
         // insert the HTML into the DOM
         document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+      },
 
+      clearFields: function() {
+        var fields, fieldsArr;
+        // fields is a list
+        fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
 
+        // this will trick the slice method into thinking that we give it an array
+        // fieldsArr is a array
+        fieldsArr = Array.prototype.slice.call(fields);
+
+        // set the value of field ""
+        // fieldsArr hold [input.add__description, input.add__value]
+        fieldsArr.forEach(function(current, index, array) {// array is fieldsArr
+          current.value = "";
+        });
+        fieldsArr[0].focus();
       },
 
       getDOMstrings: function() {
@@ -133,6 +147,8 @@ var controller = (function(budgetCtrl, UICtrl) {
       newItem = budgetCtrl.addItem(input.type, input.description, input.value);
       // 3. add the item to UI
       UICtrl.addListItem(newItem, input.type);
+      // 4. clear the fields
+      UICtrl.clearFields();
       // 4. calculate the budget
       // 5. display the budget on UI
     };
