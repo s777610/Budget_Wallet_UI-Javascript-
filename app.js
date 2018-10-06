@@ -56,6 +56,19 @@ var budgetController = (function () {
         return newItem;
       },
 
+      deleteItem: function(type, id) {
+        var ids, index;
+        // ids = [1,2,4,6,8], id is not index
+        ids = data.allItems[type].map(function(current) {
+          return current.id;
+        });
+        index = ids.indexOf(id);
+        // if not fonud in array index = -1, if found we are going to delete it
+        if (index !== -1) {
+          data.allItems[type].splice(index, 1)
+        }
+      },
+
       calculateBudget: function() {
         // calculate total incom and expenses
         calculateTotal('exp');
@@ -140,6 +153,12 @@ var UIController = (function() {
         document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
       },
 
+      deleteListItem: function(selectorID) {
+        var el = document.getElementById(selectorID);
+        el.parentNode.removeChild(el);
+
+      },
+
       clearFields: function() {
         var fields, fieldsArr;
         // fields is a list
@@ -196,13 +215,12 @@ var controller = (function(budgetCtrl, UICtrl) {
       document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
 
     };
+
     var updateBudget = function() {
       // 1. calculate the budget
       budgetCtrl.calculateBudget();
-
       // 2. return the budget
       var budget = budgetCtrl.getBudget();
-
       // 3. display the budget on UI
       UICtrl.displayBudget(budget);
     };
@@ -231,17 +249,21 @@ var controller = (function(budgetCtrl, UICtrl) {
     var ctrlDeleteItem = function(event) {
       var itemID, splitID, type, ID;
       // target is where event happen(click)
+      // itemID is income-0, target is <i class="ion-ios-close-outline"> in this case
       itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
       if (itemID) {
         splitID = itemID.split('-');
         type = splitID[0];
-        ID = splitID[1];
+        ID = parseInt(splitID[1]);
 
         // delete the item from data structure
+        budgetCtrl.deleteItem(type, ID);
 
         // delete the item from the UI
+        UICtrl.deleteListItem(itemID);
 
         // update and show the new budget__title
+        updateBudget();
 
       }
     };
