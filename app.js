@@ -61,7 +61,6 @@ var budgetController = (function () {
         } else {
           ID = 0;
         }
-
         // create new item based on inc or exp type
         if (type === 'exp') {
           newItem = new Expense(ID, des, val);
@@ -72,6 +71,7 @@ var budgetController = (function () {
         data.allItems[type].push(newItem);
         return newItem;
       },
+
 
       deleteItem: function(type, id) {
         var ids, index;
@@ -85,6 +85,7 @@ var budgetController = (function () {
           data.allItems[type].splice(index, 1)
         }
       },
+
 
       calculateBudget: function() {
         // calculate total incom and expenses
@@ -100,15 +101,15 @@ var budgetController = (function () {
         } else {
           data.percentage = -1;
         }
-
       },
+
 
       calculatePercentages: function() {
         data.allItems.exp.forEach(function(cur) {
           cur.calcPercentage(data.totals.inc);
         });
-
       },
+
 
       getPercentages: function() {
         // map return something, forEach doesn't
@@ -118,6 +119,7 @@ var budgetController = (function () {
         return allPerc;
       },
 
+
       getBudget: function() {
         return {
           budget: data.budget,
@@ -126,6 +128,7 @@ var budgetController = (function () {
           percentage: data.percentage
         }
       },
+
 
       testing: function() {
         console.log(data);
@@ -137,7 +140,7 @@ var budgetController = (function () {
 
 
 /////////////////////////////////////////////////
-// private //////////////////////////////////////
+// private UIController /////////////////////////
 /////////////////////////////////////////////////
 var UIController = (function() {
 
@@ -154,6 +157,21 @@ var UIController = (function() {
       percentageLabel: '.budget__expenses--percentage',
       container: '.container',
       expensesPercLabel: '.item__percentage'
+    };
+
+    var formatNumber = function(num, type) {
+      var numSplit, int, dec, type;
+      num = Math.abs(num);
+      num = num.toFixed(2);
+      numSplit = num.split('.');
+
+      int = numSplit[0];
+      if (int.length > 3) {
+        int = int.substr(0, int.length - 3) + ',' + int.substr(int.length-3, 3);
+      }
+      dec = numSplit[1];
+      return (type === 'exp' ? sign = '-' : sign = '+') + ' ' + int + '.' + dec;
+
     };
 
     // expose it, public
@@ -181,7 +199,7 @@ var UIController = (function() {
         // replace the placeholder text with some actual data
         newHtml = html.replace('%id%', obj.id);
         newHtml = newHtml.replace('%description%', obj.description)
-        newHtml = newHtml.replace('%value%', obj.value)
+        newHtml = newHtml.replace('%value%', formatNumber(obj.value, type))
 
         // insert the HTML into the DOM
         document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
@@ -211,9 +229,12 @@ var UIController = (function() {
       },
 
       displayBudget: function(obj) {
-        document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
-        document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
-        document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
+        var type;
+        obj.budget > 0 ? type = 'inc' : type = 'exp';
+
+        document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
+        document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
+        document.querySelector(DOMstrings.expensesLabel).textContent = formatNumber(obj.totalExp, 'exp');
 
         if (obj.percentage > 0) {
           document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage + '%';
@@ -235,7 +256,9 @@ var UIController = (function() {
         };
 
         nodeListForEach(fields, function(current, index) { // list[i], i
+          // here is callback function
           if (percentages[index] > 0) {
+            // current is list[i] for exaple
             current.textContent = percentages[index] + '%';
           } else {
             current.textContent = '---';
