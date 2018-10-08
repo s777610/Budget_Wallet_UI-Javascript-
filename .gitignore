@@ -116,6 +116,7 @@ company_blog/data.sqlite
 .dmypy.json
 dmypy.json
 
+architecture.png
 
 .DS_Store
 __pycache__/
